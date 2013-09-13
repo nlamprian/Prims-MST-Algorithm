@@ -33,7 +33,7 @@ def primsMSTAlgorithm(adjList):
 
 
 def graph(filename):
-	# the file is assumed to specify the edges ofthe graph in the following format: v w e
+	# the file is assumed to specify the edges of the graph in the following format: v w e
 	# where v is one vertex of the associated edge, w is the other vertex, and e is the edge's weight
 	# the first line of the file specifies the number on the vertices and the number of the edges
 	
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 	filename = sys.argv[1]
 	adjList, edgeList = graph(filename) # build an adjancency list and an incidence list
 
-	# the algorithm return edgeIDs that we can make use on the incidence list
+	# the algorithm returns edgeIDs that we can make use on the incidence list
 	mst = primsMSTAlgorithm(adjList) # execute prim's algorithm
 
 	cost = 0
