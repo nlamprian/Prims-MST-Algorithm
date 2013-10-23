@@ -8,14 +8,14 @@ def primsMSTAlgorithm(adjList):
 
 	It finds a MST of an undirected graph
 
-    Args:
-    	adjList: a dictionary, as a realization of an adjacency list, in the form
+	Args:
+		adjList: a dictionary, as a realization of an adjacency list, in the form
 				 adjList[vertex1] = [(vertex21,weight1,edgeId1), (vertex22,weight2,edgeId2), ...]
 				 Note: Every vertex should have an entry in the adjList
 
-    Returns:
-    	mst: a set of all the edges (ids) that constitute the minimum spanning tree
-    '''
+	Returns:
+		mst: a set of all the edges (ids) that constitute the minimum spanning tree
+	'''
 	def updateHeap(v):
 		'''
 		Updates the heap with entries of all the vertices incident to vertex v that was recently explored
