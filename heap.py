@@ -1,109 +1,169 @@
-''' Implementation of a binary min heap Class
-    Assumption: Input elements are tuples (x,y) or lists [x,y]
-                where their first element is a key (score)
-                      their second element is an identifier (id)
-                  and after those two, anything can follow '''
-
 class Heap:
+	'''
+	Implementation of a binary minimum heap data structure
+
+	Assumptions:
+		Input elements can be tuples or lists, where
+		the first element is a key (which the algorithm for enforcing the heap property is based on),
+		the second element is an identifier for the related object,
+		and after that, anything can follow.
+
+	Attributes:
+		heap: a list as a realization of the heap
+		heapIdx: a dictionary with keys the identifiers of the objects in the heap, and
+				 with values the indices of the objects' positions in the heap.
+	'''
 
 	def __init__(self, element = None, batch = None):
-		# element - an element to be inserted into the heap
-		# batch - a list of elements to be inserted into the heap
-		self.h = [] # the heap
-		self.hIdx = {} # a dictionary to keep the indices of the elements in the list (heap)
-		if element: self.insert(element)
+		'''
+		Creates the heap
+
+		The heap can be initiated empty, with an object, or with many objects
+
+		Args:
+			element: an object for insertion into the heap
+			batch: a list of objects for insertion into the heap
+		'''
+		self.heap, self.heapIdx = [], {}
 		if batch: self.heapify(batch)
+		if element: self.insert(element)
+
 
 	def length(self):
-		return len(self.h) # return the number of elements in the heap
+		'''
+		Returns the number of objects in the heap
+		'''
+		return len(self.heap) 
 
-	def insert(self, element): # insert an element in the list (heap)
-		self.h[self.length():] = [element] # place the element at the end of the list (heap)
-		self.hIdx[element[1]] = self.length() - 1 # update the dictionary with the element's index in the list (heap)
-		self.__siftUp() # enforce the heap property
+
+	def insert(self, element):
+		'''
+		Inserts an object in the heap
+
+		Args:
+			element: object for insertion into the heap
+		'''
+		self.heap[self.length():] = [element]
+		self.heapIdx[element[1]] = self.length() - 1
+		self.__siftUp()
+
 
 	def __siftUp(self):
+		'''
+		Enforces the heap property (after an insertion into the heap)
+		'''
 		childIdx = self.length() - 1
-		parentIdx = int((childIdx-1)/2)
-		while self.h[childIdx][0] < self.h[parentIdx][0]:
-			# if the child's key is less than the parent's key
-			# swap the elements and update the dictionary with the new indices
-			parent, child = self.h[parentIdx], self.h[childIdx]
-			self.h[parentIdx], self.hIdx[child[1]] = child, parentIdx
-			self.h[childIdx], self.hIdx[parent[1]] = parent, childIdx
-			parentIdx, childIdx = int((parentIdx-1)/2), parentIdx
+		parentIdx = int((childIdx - 1) / 2)
+		while self.heap[childIdx][0] < self.heap[parentIdx][0]:
+			parent, child = self.heap[parentIdx], self.heap[childIdx]
+			self.heap[parentIdx], self.heapIdx[child[1]] = child, parentIdx
+			self.heap[childIdx], self.heapIdx[parent[1]] = parent, childIdx
+			parentIdx, childIdx = int((parentIdx - 1) / 2), parentIdx
+
 
 	def heapify(self, batch):
-		# heapify builds the heap in linear time
-		# batch - list of elements (key,identifier) to be inserted into the heap
-		self.h, self.hIdx = [], {}
-		for idx,element in enumerate(batch): # populate the heap
-			self.h.append(element)
-			self.hIdx[element[1]] = idx
-		for i in range(int(self.length()/2)-1,-1,-1): # enforce the heap property on every element
+		'''
+		Builds the heap in linear time
+		
+		Args:
+			batch: list of objects for insertion into the heap
+		'''
+		for idx, element in enumerate(batch):  # populates the heap
+			self.heap.append(element)
+			self.heapIdx[element[1]] = idx
+		for i in range(int(self.length() / 2) - 1, -1, -1):  # enforces the heap property
 			self.__minHeapify(i)
 
+
 	def __minHeapify(self, parentIdx):
-		leftChildIdx, rightChildIdx = parentIdx*2+1, parentIdx*2+2
-		lowest = leftChildIdx if leftChildIdx < self.length() and self.h[leftChildIdx] < self.h[parentIdx] else parentIdx
-		if rightChildIdx < self.length() and self.h[rightChildIdx] < self.h[lowest]: lowest = rightChildIdx
-		if lowest != parentIdx: # if the heap property is violated, fix it and recurse
-			parent, child = self.h[parentIdx], self.h[lowest]
-			self.h[parentIdx], self.hIdx[child[1]] = child, parentIdx
-			self.h[lowest], self.hIdx[parent[1]] = parent, lowest
+		'''
+		Enforces the heap property, top to bottom, along a certain path
+		
+		Args:
+			parentIdx: starting position for the checking
+		'''
+		leftChildIdx, rightChildIdx = 2 * parentIdx + 1, 2 * parentIdx + 2
+		lowest = leftChildIdx if leftChildIdx < self.length() and self.heap[leftChildIdx] < self.heap[parentIdx] else parentIdx
+		if rightChildIdx < self.length() and self.heap[rightChildIdx] < self.heap[lowest]: lowest = rightChildIdx
+		if lowest != parentIdx:
+			parent, child = self.heap[parentIdx], self.heap[lowest]
+			self.heap[parentIdx], self.heapIdx[child[1]] = child, parentIdx
+			self.heap[lowest], self.heapIdx[parent[1]] = parent, lowest
 			self.__minHeapify(lowest)
 
+
 	def extractMin(self):
-		minE = self.h[0] # get the minimum element from the top of the heap
-		del self.hIdx[minE[1]] # remove the corresponding entry of the element from the dictionary
-		lastNode = self.h.pop() # extract the last element of the list (heap)
+		'''
+		Extracts the top (minimum) object from the heap, and rectifies the heap
+		'''
+		minElm = self.heap[0]
+		del self.heapIdx[minElm[1]]
+		lastElm = self.heap.pop()
 		if self.length():
-			self.h[0] = lastNode # replace the gap on the top with the last element
-			self.hIdx[lastNode[1]] = 0 # update its position on the dictionary
-			self.__siftDown(0) # enforce the heap property, starting from the root
-		return minE
+			self.heap[0] = lastElm
+			self.heapIdx[lastElm[1]] = 0
+			self.__siftDown(0)
+		return minElm
+
 
 	def __siftDown(self, parentIdx):
-		if parentIdx*2+1 >= self.length(): return # if the "parent" doesn't have children, we are good to go!
-		if parentIdx*2+2 >= self.length(): # if the parent has one child...
-			# and its key is less than the parent's key, swap them
-			if self.h[parentIdx][0] > self.h[parentIdx*2+1][0]:
-				parent, child = self.h[parentIdx], self.h[parentIdx*2+1]
-				self.h[parentIdx], self.hIdx[child[1]] = child, parentIdx
-				self.h[parentIdx*2+1], self.hIdx[parent[1]] = parent, parentIdx*2+1
+		'''
+		Enforces the heap property (after an extraction from the heap)
+		'''
+		if 2 * parentIdx + 1 >= self.length(): return  # if the parent doesn't have children, you are good to go!
+		if 2 * parentIdx + 2 >= self.length():  # if the parent has one child...
+			# and the child's key is less than the parent's key, it swaps the entries
+			if self.heap[parentIdx][0] > self.heap[2 * parentIdx + 1][0]:
+				parent, child = self.heap[parentIdx], self.heap[2 * parentIdx + 1]
+				self.heap[parentIdx], self.heapIdx[child[1]] = child, parentIdx
+				self.heap[2 * parentIdx + 1], self.heapIdx[parent[1]] = parent, 2 * parentIdx + 1
 			return
 
-		parent = self.h[parentIdx]
-		leftChild, rightChild = self.h[parentIdx*2+1], self.h[parentIdx*2+2]
+		parent = self.heap[parentIdx]
+		leftChild, rightChild = self.heap[2 * parentIdx + 1], self.heap[2 * parentIdx + 2]
 		minLeft = False
 		if leftChild[0] <= rightChild[0]: minLeft = True
 		if parent[0] > min(leftChild[0], rightChild[0]):
-			self.h[parentIdx] = leftChild if minLeft else rightChild
-			self.hIdx[leftChild[1] if minLeft else rightChild[1]] = parentIdx
-			self.h[parentIdx*2+1 if minLeft else parentIdx*2+2] = parent
-			self.hIdx[parent[1]] = parentIdx*2+1 if minLeft else parentIdx*2+2
-			self.__siftDown(parentIdx*2+1+(not minLeft))
+			self.heap[parentIdx] = leftChild if minLeft else rightChild
+			self.heapIdx[leftChild[1] if minLeft else rightChild[1]] = parentIdx
+			self.heap[2 * parentIdx + 1 if minLeft else 2 * parentIdx + 2] = parent
+			self.heapIdx[parent[1]] = 2 * parentIdx + 1 if minLeft else 2 * parentIdx + 2
+			self.__siftDown(2 * parentIdx + 1 + (not minLeft))
+
 
 	def get(self, id):
-		# return an element from the list (heap), else None
-		return self.h[self.hIdx[id]] if id in self.hIdx else None
+		'''
+		Returns an object from the heap. If the object is not in the heap, it returns None
+
+		Args:
+			id: identifier of the object to be retrieved
+		'''
+		return self.heap[self.heapIdx[id]] if id in self.heapIdx else None
+
 
 	def delete(self, id):
-		if id not in self.hIdx: return None
-		idx = self.hIdx[id] # get the element's position in the list (heap)
-		del self.hIdx[id] # delete that element's entry from the dictionary
-		node = self.h[idx] # backup the element of interest
-		lastNode = self.h.pop() # extract the last element from the list (heap)...
+		'''
+		Deletes an object from the heap, and returns that object
+
+		Args:
+			id: identifier of the object to be handled
+		'''
+		if id not in self.heapIdx: return None
+		idx = self.heapIdx[id]
+		del self.heapIdx[id]
+		element = self.heap[idx]
+		lastElm = self.heap.pop()
 		if idx != self.length():
-			self.h[idx] = lastNode # ... place it in the "gap" from the element to be removed
-			self.hIdx[lastNode[1]] = idx # ... and update its position 
-			self.__siftDown(idx) # enforce the heap property, starting from the deleted element
-		return node
+			self.heap[idx] = lastElm
+			self.heapIdx[lastElm[1]] = idx
+			self.__siftDown(idx)
+		return element
+
 
 
 if __name__ == "__main__":
 	l = [[9,'a'],[7,'c'],[5,'d'],[4,'h'],[3,'f'],[2,'x'],[1,'r'],[6,'t'],[3,'u'],[7,'v'],[2,'w'],[6,'l'],[4,'o']]
-	heap = Heap(batch=l)
-	print(heap.h)
+	heap = Heap(batch = l)
+	print(heap.heap)
 	heap.extractMin()
-	print(heap.h)
+	print(heap.heap)
